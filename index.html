@@ -8,6 +8,8 @@
 
   <title>Namibia Hockey Gate Scanner</title>
 
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -19,9 +21,9 @@
 
     .card {
       max-width: 500px;
-      margin: 40px auto;
+      margin: 20px auto;
       background: white;
-      padding: 30px 20px;
+      padding: 25px 20px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     }
@@ -30,10 +32,17 @@
       margin-top: 0;
     }
 
-    .ready {
-      font-size: 22px;
+    #reader {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      font-size: 18px;
       font-weight: bold;
-      margin-top: 25px;
+      word-break: break-word;
     }
   </style>
 </head>
@@ -43,14 +52,51 @@
   <div class="card">
 
     <h1>Namibia Hockey</h1>
-
     <h2>Gate QR Scanner</h2>
 
-    <div class="ready">
-      ✅ SCANNER PAGE READY
+    <p>Scan a ticket QR code below.</p>
+
+    <div id="reader"></div>
+
+    <div id="result">
+      Waiting for QR code...
     </div>
 
   </div>
+
+  <script>
+
+    let scanComplete = false;
+
+    function qrCodeSuccess(decodedText) {
+
+      if (scanComplete) {
+        return;
+      }
+
+      scanComplete = true;
+
+      document.getElementById("result").innerHTML =
+        "✅ QR CODE READ<br><br>" +
+        decodedText;
+
+    }
+
+    const scanner = new Html5QrcodeScanner(
+      "reader",
+      {
+        fps: 10,
+        qrbox: {
+          width: 250,
+          height: 250
+        }
+      },
+      false
+    );
+
+    scanner.render(qrCodeSuccess);
+
+  </script>
 
 </body>
 </html>
