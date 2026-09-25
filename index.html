@@ -32,6 +32,28 @@
       margin-top: 0;
     }
 
+    .game-buttons {
+  display: flex;
+  gap: 6px;
+  margin: 15px 0 20px 0;
+}
+
+.game-btn {
+  flex: 1;
+  min-height: 52px;
+  font-size: 20px;
+  font-weight: bold;
+  border: 2px solid #999;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.game-btn.selected {
+  background: #d9ead3;
+  border-color: #222;
+}
+    
     #reader {
       width: 100%;
       margin-top: 20px;
@@ -54,9 +76,19 @@
     <h1>Namibia Hockey</h1>
     <h2>Gate QR Scanner</h2>
 
-    <p>Scan a ticket QR code below.</p>
+<p><strong>Select current game:</strong></p>
 
-    <div id="reader"></div>
+<div class="game-buttons">
+  <button type="button" class="game-btn" data-game="Game 1">1</button>
+  <button type="button" class="game-btn" data-game="Game 2">2</button>
+  <button type="button" class="game-btn" data-game="Game 3">3</button>
+  <button type="button" class="game-btn" data-game="Game 4">4</button>
+  <button type="button" class="game-btn" data-game="Game 5">5</button>
+</div>
+
+<p>Scan a ticket QR code below.</p>
+
+<div id="reader"></div>
 
     <div id="result">
       Waiting for QR code...
@@ -67,6 +99,38 @@
   <script>
 
     let scanComplete = false;
+
+    let selectedGame =
+  localStorage.getItem("scannerGame") || "";
+
+const gameButtons =
+  document.querySelectorAll(".game-btn");
+
+gameButtons.forEach(function(button) {
+
+  if (button.getAttribute("data-game") === selectedGame) {
+    button.classList.add("selected");
+  }
+
+  button.addEventListener("click", function() {
+
+    selectedGame =
+      button.getAttribute("data-game");
+
+    localStorage.setItem(
+      "scannerGame",
+      selectedGame
+    );
+
+    gameButtons.forEach(function(btn) {
+      btn.classList.remove("selected");
+    });
+
+    button.classList.add("selected");
+
+  });
+
+});
 
     function qrCodeSuccess(decodedText) {
 
