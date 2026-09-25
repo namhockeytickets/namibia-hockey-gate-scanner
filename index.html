@@ -138,12 +138,29 @@ gameButtons.forEach(function(button) {
     return;
   }
 
+  if (!selectedGame) {
+    document.getElementById("result").innerHTML =
+      "⛔ SELECT CURRENT GAME FIRST";
+    return;
+  }
+
   scanComplete = true;
 
   document.getElementById("result").innerHTML =
-    "✅ TICKET SCANNED<br><br>Opening gate...";
+    "✅ TICKET SCANNED<br><br>" +
+    selectedGame +
+    "<br>Opening gate...";
 
-  window.location.href = decodedText;
+  const separator =
+    decodedText.includes("?") ? "&" : "?";
+
+  const gateUrl =
+    decodedText +
+    separator +
+    "game=" +
+    encodeURIComponent(selectedGame);
+
+  window.location.href = gateUrl;
 
 }
 
