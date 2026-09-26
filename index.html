@@ -90,6 +90,20 @@
 
 <div id="reader"></div>
 
+    <button
+  id="apiTestButton"
+  type="button"
+  style="
+    width:100%;
+    padding:15px;
+    margin-top:20px;
+    font-size:18px;
+    font-weight:bold;
+  "
+>
+  TEST API CONNECTION
+</button>
+    
     <div id="result">
       Waiting for QR code...
     </div>
@@ -98,6 +112,41 @@
 
   <script>
 
+    const apiTestButton =
+  document.getElementById("apiTestButton");
+
+apiTestButton.addEventListener("click", async function() {
+
+  const resultBox =
+    document.getElementById("result");
+
+  resultBox.innerHTML =
+    "Testing connection...";
+
+  try {
+
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbxDqZ7FrNTHIgxAeD5i1ZzEW08YypZHQ_d1PwWUGk3-R9S8rNSrC6-pBsze4Fs6Bi9pbQ/exec",
+      {
+        method: "POST"
+      }
+    );
+
+    const data = await response.json();
+
+    resultBox.innerHTML =
+      "✅ " + data.message;
+
+  } catch (error) {
+
+    resultBox.innerHTML =
+      "⛔ API CONNECTION FAILED<br><br>" +
+      error.message;
+
+  }
+
+});
+    
     let scanComplete = false;
 
     let selectedGame =
