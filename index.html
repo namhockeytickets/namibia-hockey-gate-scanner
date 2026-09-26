@@ -320,29 +320,139 @@ gameButtons.forEach(function(button) {
 
   scanComplete = true;
 
-  document.getElementById("result").innerHTML =
-    "✅ TICKET SCANNED<br><br>" +
-    selectedGame +
-    "<br>Opening gate...";
+  const resultBox =
+    document.getElementById("result");
 
-  const separator =
-    decodedText.includes("?") ? "&" : "?";
+  resultBox.innerHTML =
+    "🔎 CHECKING TICKET...";
 
-  const gateUrl =
-    decodedText +
-    separator +
-    "game=" +
-    encodeURIComponent(selectedGame);
-
-  // Properly stop and release the phone camera
-  // before leaving the scanner page.
   try {
-    await scanner.clear();
-  } catch (error) {
-    console.log("Scanner cleanup:", error);
-  }
 
-  window.location.href = gateUrl;
+    // Read the Order ID from the existing ticket QR URL
+    const ticketUrl =
+      new URL(decodedText);
+
+    const orderId =
+      ticketUrl.searchParams.get("order");
+
+    if (!orderId) {
+
+      resultBox.innerHTML =
+        "⛔ INVALID TICKET QR CODE";
+
+      scanComplete = false;
+      return;
+    }
+
+    const gateToken =
+      localStorage.getItem("scannerGateToken");
+
+    if (!gateToken) {
+
+      resultBox.innerHTML =
+        "🔐 GATE ACCESS REQUIRED";
+
+      scanComplete = false;
+      return;
+    }
+
+    const response = await fetch(
+      apiUrl,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "checkTicket",
+          orderId: orderId,
+          game: selectedGame,
+          gateToken: gateToken
+        })
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (result.unauthorized) {
+
+      localStorage.removeItem(
+        "scannerGateToken"
+      );
+
+      gateLogin.style.display = "block";
+      scannerArea.style.display = "none";
+
+      gateLoginMessage.innerHTML =
+        "🔐 GATE SESSION EXPIRED — ENTER PIN AGAIN";
+
+      scanComplete = false;
+      return;
+    }
+
+    if (!result.valid) {
+
+      let message =
+        "⛔ " + result.message;
+
+      if (result.buyerName) {
+        message +=
+          "<br><br>" +
+          result.buyerName;
+      }
+
+      if (result.product) {
+        message +=
+          "<br>" +
+          result.product;
+      }
+
+      if (result.correctGame) {
+        message +=
+          "<br><br>Valid for: " +
+          result.correctGame;
+      }
+
+      if (
+        result.message ===
+        "ALREADY FULLY USED"
+      ) {
+        message +=
+          "<br><br>Purchased: " +
+          result.purchased +
+          "<br>Already admitted: " +
+          result.admitted +
+          "<br><strong>Remaining: 0</strong>";
+      }
+
+      resultBox.innerHTML = message;
+
+      return;
+    }
+
+    resultBox.innerHTML =
+      "✅ TICKET VALID FOR THIS GAME" +
+      "<br><br>" +
+      result.buyerName +
+      "<br>" +
+      result.product +
+      "<br><br>" +
+      "Purchased: " +
+      result.purchased +
+      "<br>" +
+      "Already admitted: " +
+      result.admitted +
+      "<br><strong>Remaining: " +
+      result.remaining +
+      "</strong>";
+
+  } catch (error) {
+
+    document.getElementById("result").innerHTML =
+      "⛔ TICKET CHECK FAILED<br><br>" +
+      error.message;
+
+    scanComplete = false;
+
+  }
 
 }
 
