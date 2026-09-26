@@ -459,26 +459,46 @@ gameButtons.forEach(function(button) {
 }
 
 let scanner = null;
+let scannerRunning = false;
 
-function startScanner() {
+async function startScanner() {
 
-  if (scanner) {
+  if (scannerRunning) {
     return;
   }
 
-  scanner = new Html5QrcodeScanner(
-    "reader",
-    {
-      fps: 10,
-      qrbox: {
-        width: 250,
-        height: 250
-      }
-    },
-    false
-  );
+  if (!scanner) {
+    scanner = new Html5Qrcode("reader");
+  }
 
-  scanner.render(qrCodeSuccess);
+  try {
+
+    await scanner.start(
+      {
+        facingMode: "environment"
+      },
+      {
+        fps: 10,
+        qrbox: {
+          width: 250,
+          height: 250
+        }
+      },
+      qrCodeSuccess,
+      function() {
+        // Normal scan misses are ignored.
+      }
+    );
+
+    scannerRunning = true;
+
+  } catch (error) {
+
+    document.getElementById("result").innerHTML =
+      "⛔ CAMERA COULD NOT START<br><br>" +
+      error;
+
+  }
 
 }
 
