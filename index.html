@@ -132,7 +132,7 @@ gameButtons.forEach(function(button) {
 
 });
 
-    function qrCodeSuccess(decodedText) {
+    async function qrCodeSuccess(decodedText) {
 
   if (scanComplete) {
     return;
@@ -159,6 +159,14 @@ gameButtons.forEach(function(button) {
     separator +
     "game=" +
     encodeURIComponent(selectedGame);
+
+  // Properly stop and release the phone camera
+  // before leaving the scanner page.
+  try {
+    await scanner.clear();
+  } catch (error) {
+    console.log("Scanner cleanup:", error);
+  }
 
   window.location.href = gateUrl;
 
