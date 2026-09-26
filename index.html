@@ -189,6 +189,88 @@ apiTestButton.addEventListener("click", async function() {
   }
 
 });
+
+    const gateLogin =
+  document.getElementById("gateLogin");
+
+const scannerArea =
+  document.getElementById("scannerArea");
+
+const gatePin =
+  document.getElementById("gatePin");
+
+const gateLoginButton =
+  document.getElementById("gateLoginButton");
+
+const gateLoginMessage =
+  document.getElementById("gateLoginMessage");
+
+const apiUrl =
+  "https://script.google.com/macros/s/AKfycbxDqZ7FrNTHIgxAeD5i1ZzEW08YypZHQ_d1PwWUGk3-R9S8rNSrC6-pBsze4Fs6Bi9pbQ/exec";
+
+gateLoginButton.addEventListener("click", async function() {
+
+  const pin = gatePin.value.trim();
+
+  if (!pin) {
+    gateLoginMessage.innerHTML =
+      "⛔ ENTER GATE PIN";
+    return;
+  }
+
+  gateLoginButton.disabled = true;
+  gateLoginButton.innerText = "CHECKING...";
+  gateLoginMessage.innerHTML = "";
+
+  try {
+
+    const response = await fetch(
+      apiUrl,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "login",
+          pin: pin
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    gateLoginButton.disabled = false;
+    gateLoginButton.innerText = "UNLOCK GATE";
+
+    if (!data || !data.success) {
+
+      gatePin.value = "";
+
+      gateLoginMessage.innerHTML =
+        "⛔ INCORRECT PIN";
+
+      return;
+    }
+
+    localStorage.setItem(
+      "scannerGateToken",
+      data.token
+    );
+
+    gatePin.value = "";
+
+    gateLogin.style.display = "none";
+    scannerArea.style.display = "block";
+
+  } catch (error) {
+
+    gateLoginButton.disabled = false;
+    gateLoginButton.innerText = "UNLOCK GATE";
+
+    gateLoginMessage.innerHTML =
+      "⛔ CONNECTION ERROR – TRY AGAIN";
+
+  }
+
+});
     
     let scanComplete = false;
 
